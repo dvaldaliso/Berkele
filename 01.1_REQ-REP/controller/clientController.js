@@ -1,16 +1,18 @@
 import * as zmq from "zeromq"
+import Mensaje from "../model/mensaje.js";
+
 export default class ClientController {
     
     constructor(url, port, nombre, tiempo) {
         console.log("Connecting to hello world server... tiempo"+tiempo)
         this.socketParaPedir = zmq.socket('req')
-        this.N=10
+        this.N=3
         this.cont=0
         this.tiempo=tiempo
         this.nombre=nombre
         this.#connect(url+":"+port)
         this.#recibirRespuesta()
-        this.#enviarMensaje(1)
+        this.#enviarMensaje(new Mensaje(0, nombre, tiempo))
         this.#checkSalida()
     }
 
@@ -22,8 +24,13 @@ export default class ClientController {
         this.socketParaPedir.on("message", function(respuesta) {
             this.cont++
             console.log("client " +this.nombre+ " recibo respuesta ", this.cont, ": [", respuesta.toString(), ']')
+          
+            let messaje = JSON.parse(respuesta.toString());
+            
+            this.#enviarMensaje (new Mensaje(messaje.id+1, this.nombre, this.tiempo))
 
             if(this.cont===this.N){
+                console.log("termino")
                 this.socketParaPedir.close()
                 process.exit(0)
             }
@@ -37,14 +44,11 @@ export default class ClientController {
     // Atención: no debería ser así. Debería esperar respuesta.
     // Sin embargo, la biblioteca para JS parece que lo tolera
     //
-    #enviarMensaje(n){
-        if(n<this.N){
-            setTimeout(function() {
-                console.log("enviando petición ", n, '...')
-                this.socketParaPedir.send("Hello " + n + " desde " + this.nombre)
-                
-                this.#enviarMensaje (n+1, this.nombre)
-            }.bind(this), 800)
+    #enviarMensaje(message){
+        if(message.id<this.N){
+                console.log("enviando petición ", message.id, '...')
+                const messageString = JSON.stringify(message);
+                this.socketParaPedir.send(messageString)
         }
     }
 

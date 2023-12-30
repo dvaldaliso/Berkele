@@ -1,4 +1,5 @@
 import * as zmq from "zeromq"
+import { tiempoPromedio } from "../util/claculo.js";
  export default class ServerController{
 
     constructor(url, port){
@@ -29,6 +30,9 @@ import * as zmq from "zeromq"
                 console.log("Listening on "+port+"...")
         })
     }
+
+ 
+
     //
 	// doy la función que debe ejecutarse cuando
 	// llegue un mensaje al socket
@@ -36,25 +40,31 @@ import * as zmq from "zeromq"
     recibirMensaje(){
 
         this.socketParaResponder.on('message', function(peticionQueRecibo) {
-            this.cont++;
+        this.cont++;
             // informo por pantalla
 		console.log("servidor recibo petición: " +this.cont + " [", peticionQueRecibo.toString(), "]")
         // hago algo de "trabajo": esperar algunos segundos
 		// y entonces ejecutar el callback, en el cuál respondemos
 		// 
-		// setTimeout = encargar algo para dentro de un tiempo
+        let miArr=["12:05","12:00", "12:10", "12:02", "12:04","12:03"]
+        let promedio = tiempoPromedio(miArr)    
+        //this.responder(peticionQueRecibo)
+       
+            
+        }.bind(this))
+    }
+
+    responder(peticionQueRecibo){
+        // setTimeout = encargar algo para dentro de un tiempo
         setTimeout(function(){
             //respondemos
             console.log("servidor respondo petición: " + this.cont )
             if(this.socketParaResponder){
-                this.socketParaResponder.send(
-					" respuesta desde servidor, "
-						+ " echo de "
-						+ peticionQueRecibo.toString())
+                let messaje = JSON.parse(peticionQueRecibo.toString());
+                messaje.contenido= " respuesta desde servidor, " + " echo de "
+                this.socketParaResponder.send(JSON.stringify(messaje))
             }
-        }.bind(this),4000)
-            
-    }.bind(this))
+        }.bind(this),1000)
     }
 
     checkSalida(){

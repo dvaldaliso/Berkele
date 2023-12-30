@@ -1,4 +1,4 @@
 
 
-node mainCliente.js AAAA &
-node mainCliente.js BBBB &
+npm run cliente "12:30" &
+npm run servidor &

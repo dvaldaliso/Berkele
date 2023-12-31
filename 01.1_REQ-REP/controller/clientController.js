@@ -4,15 +4,14 @@ import Mensaje from "../model/mensaje.js";
 export default class ClientController {
     
     constructor(url, port, nombre, tiempo) {
-        console.log("Connecting to hello world server... tiempo"+tiempo)
-        this.socketParaPedir = zmq.socket('req')
-        this.N=3
+        console.log("Connecting to hello world server..."+nombre+" tiempo "+tiempo)
+        this.socketParaPedir = zmq.socket('rep')
+        this.N=6
         this.cont=0
         this.tiempo=tiempo
         this.nombre=nombre
         this.#connect(url+":"+port)
         this.#recibirRespuesta()
-        this.#enviarMensaje(new Mensaje(0, nombre, tiempo))
         this.#checkSalida()
     }
 
@@ -25,9 +24,9 @@ export default class ClientController {
             this.cont++
             console.log("client " +this.nombre+ " recibo respuesta ", this.cont, ": [", respuesta.toString(), ']')
           
-            let messaje = JSON.parse(respuesta.toString());
-            
-            this.#enviarMensaje (new Mensaje(messaje.id+1, this.nombre, this.tiempo))
+            let messaje = JSON.parse(respuesta);
+            messaje.id=this.cont
+            this.#enviarMensaje(messaje)
 
             if(this.cont===this.N){
                 console.log("termino")
@@ -45,8 +44,10 @@ export default class ClientController {
     // Sin embargo, la biblioteca para JS parece que lo tolera
     //
     #enviarMensaje(message){
-        if(message.id<this.N){
+        if(true){
                 console.log("enviando petición ", message.id, '...')
+                message.contenido="from "+this.nombre
+                message.tiempo=this.tiempo
                 const messageString = JSON.stringify(message);
                 this.socketParaPedir.send(messageString)
         }
@@ -54,6 +55,7 @@ export default class ClientController {
 
     #checkSalida(){
         process.on('SIGINT', function() {
+            console.log (" hasta luego "+this.nombre)
             console.log ( " ** SIGINT capturada: cerrando !! ** ")
             this.socketParaPedir.close()
         }.bind(this))

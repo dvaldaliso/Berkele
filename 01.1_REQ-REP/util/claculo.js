@@ -5,15 +5,16 @@ export function tiempoPromedio(listTiempo){
     }
     let sum1 = 0
     let sum2 = 0;
-    for (let i = 0; i< size-1; i+=2) {
+    for (let i = 0; i< size; i+=1) {
+     
       //sumar horas
       sum1+=parseInt( listTiempo[i].split(":")[0] )*60
-      sum2+=parseInt( listTiempo[i].split(":")[0] )*60       
+      //sum2+=parseInt( listTiempo[i+1].split(":")[0] )*60       
       //suma minutos
       sum1+=parseInt( listTiempo[i].split(":")[1] )
-      sum2+=parseInt( listTiempo[i+1].split(":")[1] )
+      //sum2+=parseInt( listTiempo[i+1].split(":")[1] )
     }
-    const promedioEnMinutos = (sum1+sum2)/size
+    const promedioEnMinutos = (sum1)/size
     const horasPromedio = (Math.floor(promedioEnMinutos / 60))
     const minutosPromedio = (Math.floor(promedioEnMinutos % 60))
     var resultado = horasPromedio.toString().padStart(2, '0') + ":" + minutosPromedio.toString().padStart(2, '0');

@@ -5,15 +5,13 @@ import Mensaje from "../model/mensaje.js";
     constructor(url, port, nombre, tiempo){
         console.log("Connecting to hello world server..."+nombre+" tiempo "+tiempo)
         // creo un socket (de la biblioteca zeromq)
-        this.socketParaResponder = zmq.socket('req') //// de tipo REP (reply)
+        this.socketParaPedir = zmq.socket('rep') //// de tipo RE (reply)
         this.cont=0;
         this.nombre=nombre
         this.tiempo=tiempo
         this.timeClient=[tiempo]
         this.vincularSocker(url,port)
-       
         this.recibirMensaje()
-        
         this.checkSalida()
     }
     //
@@ -26,29 +24,25 @@ import Mensaje from "../model/mensaje.js";
 	// efectivamente el bind()  haya ocurrido
 	// se ejecuta la función
 	//
-    async vincularSocker(url, port){
+    vincularSocker(url, port){
 
-       this.socketParaResponder.bind(url+":"+port, function(err) {
+       this.socketParaPedir.bind(url+":"+port, function(err) {
             if(err)
                 console.log(err)
             else{
                 console.log("Listening on "+port+"...")
-                this.dameHora(new Mensaje(0,"dame hora","12:00"))
-            }
                 
+            }
 
         }.bind(this))
     }
-
-
-
     //
 	// doy la función que debe ejecutarse cuando
 	// llegue un mensaje al socket
 	//
     recibirMensaje(){
 
-        this.socketParaResponder.on('message', function(peticionQueRecibo) {``
+        this.socketParaPedir.on('message', function(peticionQueRecibo) {
         this.cont++;
             // informo por pantalla
 		console.log("servidor recibo petición: " +this.cont + " [", peticionQueRecibo.toString(), "]")
@@ -61,31 +55,20 @@ import Mensaje from "../model/mensaje.js";
         console.log("promedio: "+promedio) 
         //this.responder(peticionQueRecibo)
         
-        this.dameHora(message)
+        this.horaEs(message)
             
         }.bind(this))
     }
 
-    responder(peticionQueRecibo){
-        // setTimeout = encargar algo para dentro de un tiempo
+   
+    async horaEs(message){
+        console.log("Hora envaida: ")
         setTimeout(function(){
-            //respondemos
-            console.log("servidor respondo petición: " + this.cont )
-            if(this.socketParaResponder){
-                let messaje = JSON.parse(peticionQueRecibo.toString());
-                messaje.contenido= " respuesta desde servidor, " + " echo de "
-                this.socketParaResponder.send(JSON.stringify(messaje))
-            }
-        }.bind(this),1000)
-    }
-    dameHora(message){
-        console.log("dame hora: ")
-        setTimeout(function(){
-            if(this.socketParaResponder){
-                message.contenido= " dame hora from "+this.nombre
+            if(this.socketParaPedir){
+                message.contenido= " hora from "+this.nombre
                 message.tiempo= this.tiempo
                 const messageString = JSON.stringify(message);
-                this.socketParaResponder.send(messageString)
+                this.socketParaPedir.send(messageString)
             }
         }.bind(this,message),6000)
         
@@ -94,8 +77,8 @@ import Mensaje from "../model/mensaje.js";
         process.on('SIGINT', function() {
             console.log (" sigint capturada ! ")
             console.log (" hasta luego "+this.nombre)
-            this.socketParaResponder.close()
-            // socketParaResponder = null
+            this.socketParaPedir.close()
+            // socketParaPedir = null
         }.bind(this))
     }
  }

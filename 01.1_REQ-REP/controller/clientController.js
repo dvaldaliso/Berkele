@@ -5,13 +5,14 @@ export default class ClientController {
     
     constructor(url, port, nombre, tiempo) {
         console.log("Connecting to hello world server..."+nombre+" tiempo "+tiempo)
-        this.socketParaPedir = zmq.socket('rep')
+        this.socketParaPedir = zmq.socket('req') // Type Request
         this.N=6
         this.cont=0
         this.tiempo=tiempo
         this.nombre=nombre
         this.#connect(url+":"+port)
-        this.#recibirRespuesta()
+        this.#dameHora(new Mensaje(1,"dame hora",tiempo))
+        this.#recibirHora()
         this.#checkSalida()
     }
 
@@ -19,14 +20,14 @@ export default class ClientController {
         this.socketParaPedir.connect(url)
     }
 
-    #recibirRespuesta(){
+    #recibirHora(){
         this.socketParaPedir.on("message", function(respuesta) {
             this.cont++
             console.log("client " +this.nombre+ " recibo respuesta ", this.cont, ": [", respuesta.toString(), ']')
           
             let messaje = JSON.parse(respuesta);
             messaje.id=this.cont
-            this.#enviarMensaje(messaje)
+            this.#dameHora(messaje)
 
             if(this.cont===this.N){
                 console.log("termino")
@@ -43,14 +44,16 @@ export default class ClientController {
     // Atención: no debería ser así. Debería esperar respuesta.
     // Sin embargo, la biblioteca para JS parece que lo tolera
     //
-    #enviarMensaje(message){
-        if(true){
-                console.log("enviando petición ", message.id, '...')
-                message.contenido="from "+this.nombre
-                message.tiempo=this.tiempo
-                const messageString = JSON.stringify(message);
-                this.socketParaPedir.send(messageString)
-        }
+    #dameHora(message){
+        setTimeout(function(){
+            if(this.socketParaPedir){
+                    console.log("enviando petición ", message.id, '...')
+                    message.contenido="dame hora from "+this.nombre
+                    message.tiempo=this.tiempo
+                    const messageString = JSON.stringify(message);
+                    this.socketParaPedir.send(messageString)
+            }
+        }.bind(this,message),6000)
     }
 
     #checkSalida(){

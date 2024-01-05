@@ -1,8 +1,10 @@
 export default class Mensaje {
-    constructor(id, contenido, tiempo) {
-        this.id=id
-        this.contenido = "Hello " + id + " desde " + contenido
-        this.tiempo = tiempo       
+    constructor(cont, from, contenido, tiempo) {
+        this.from=from
+        this.cont=cont
+        this.contenido = "Hello " + cont + " desde " + contenido
+        this.tiempo = tiempo
+        this.diferencia=0       
         
     }
 }

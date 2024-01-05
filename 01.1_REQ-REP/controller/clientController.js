@@ -1,5 +1,6 @@
 import * as zmq from "zeromq"
 import Mensaje from "../model/mensaje.js";
+import { actualizarHora, diferenciaEntreHoras } from "../util/claculo.js";
 
 export default class ClientController {
     
@@ -11,7 +12,7 @@ export default class ClientController {
         this.tiempo=tiempo
         this.nombre=nombre
         this.#connect(url+":"+port)
-        this.#dameHora(new Mensaje(1,"dame hora",tiempo))
+        this.#dameHora(new Mensaje(1, nombre,"dame hora",tiempo))
         this.#recibirHora()
         this.#checkSalida()
     }
@@ -26,7 +27,7 @@ export default class ClientController {
             console.log("client " +this.nombre+ " recibo respuesta ", this.cont, ": [", respuesta.toString(), ']')
           
             let messaje = JSON.parse(respuesta);
-            messaje.id=this.cont
+            messaje.cont=this.cont
             this.#dameHora(messaje)
 
             if(this.cont===this.N){
@@ -37,19 +38,18 @@ export default class ClientController {
         }.bind(this))
     }
 
-    // ....................................................
-    //
-    // envío 10 mensajes (función recursiva)
-    // seguidos cada 0.8 segundos (sin esperar respuesta. 
-    // Atención: no debería ser así. Debería esperar respuesta.
-    // Sin embargo, la biblioteca para JS parece que lo tolera
-    //
+    
     #dameHora(message){
         setTimeout(function(){
             if(this.socketParaPedir){
-                    console.log("enviando petición ", message.id, '...')
                     message.contenido="dame hora from "+this.nombre
-                    message.tiempo=this.tiempo
+                    if(message.from=="master"){
+                        message.diferencia= diferenciaEntreHoras(message.tiempo,this.tiempo)
+                        this.tiempo=actualizarHora(this.tiempo,message.diferencia)
+                        
+                        console.log("enviando petición ", message.cont, '...', "tiempo actual ",this.tiempo)
+                    }
+                    message.from=this.nombre
                     const messageString = JSON.stringify(message);
                     this.socketParaPedir.send(messageString)
             }

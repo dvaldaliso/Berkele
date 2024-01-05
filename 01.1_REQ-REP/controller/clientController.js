@@ -26,9 +26,7 @@ export default class ClientController {
             this.cont++
             console.log("client " +this.nombre+ " recibo respuesta ", this.cont, ": [", respuesta.toString(), ']')
           
-            let messaje = JSON.parse(respuesta);
-            messaje.cont=this.cont
-            this.#dameHora(messaje)
+            this.#actulizarHora(respuesta)
 
             if(this.cont===this.N){
                 console.log("termino")
@@ -37,19 +35,25 @@ export default class ClientController {
             }
         }.bind(this))
     }
+    #actulizarHora(respuesta){
+        let message = JSON.parse(respuesta);
+        message.cont=this.cont
+        message.contenido="dame hora from "+this.nombre
+        if(message.from=="master"){
+            message.diferencia= diferenciaEntreHoras(message.tiempo,this.tiempo)
+            this.tiempo=actualizarHora(this.tiempo,message.diferencia)
+            
+            console.log("enviando petición ", message.cont, '...', "tiempo actual ",this.tiempo)
+        }
+        message.from=this.nombre
+        this.#dameHora(message)
 
+    }
     
     #dameHora(message){
         setTimeout(function(){
             if(this.socketParaPedir){
-                    message.contenido="dame hora from "+this.nombre
-                    if(message.from=="master"){
-                        message.diferencia= diferenciaEntreHoras(message.tiempo,this.tiempo)
-                        this.tiempo=actualizarHora(this.tiempo,message.diferencia)
-                        
-                        console.log("enviando petición ", message.cont, '...', "tiempo actual ",this.tiempo)
-                    }
-                    message.from=this.nombre
+                    
                     const messageString = JSON.stringify(message);
                     this.socketParaPedir.send(messageString)
             }

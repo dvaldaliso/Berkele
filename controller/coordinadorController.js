@@ -1,7 +1,7 @@
 import * as zmq from "zeromq"
-import { eliminarElementoFromArray, tiempoPromedio } from "../util/claculo.js";
+import { tiempoPromedio } from "../util/claculo.js";
 import Mensaje from "../model/mensaje.js";
- export default class ServerController{
+ export default class CoordinadorController{
     /**
      * 
      * @param {*} url 
@@ -42,7 +42,7 @@ import Mensaje from "../model/mensaje.js";
         this.cont++;
         respuesta = JSON.parse(respuesta.toString());
         
-         
+        //registrarCliente method 
         if( respuesta.message=="connected"){
 		    console.log("connected cliente: "+identity )
 

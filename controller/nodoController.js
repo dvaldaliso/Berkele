@@ -2,7 +2,7 @@ import * as zmq from "zeromq"
 import Mensaje from "../model/mensaje.js";
 import { actualizarHora, diferenciaEntreHoras } from "../util/claculo.js";
 
-export default class ClientController {
+export default class NodoController {
     
     constructor(url, port, nombre, tiempo) {
         console.log("Connecting to hello world server..."+nombre+" tiempo "+tiempo)
@@ -27,8 +27,6 @@ export default class ClientController {
             let message = JSON.parse(data);
             if(message.message=="dame_diferencia"){
                 this.enviarDiferencia(message)
-                
-                
             }
 
             if(message.message=="ajuste"){

@@ -8,8 +8,8 @@
 	"type": "module",
 	
 	"scripts": {
-		"cliente": "node mainCliente.js",
-		"servidor": "node mainServidor.js"
+		"nodo": "node nodo.js",
+		"coordinador": "node coordinador.js"
 	},
 	"dependencies": {
 		"zeromq": "^5.2.0"

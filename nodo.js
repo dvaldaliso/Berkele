@@ -4,11 +4,11 @@
 // (no debería hacerse así)
 // ....................................................
 
-import ClientController from "./controller/clientController.js";
+import NodoController from "./controller/nodoController.js";
 function main(){
 	let nombre = process.argv[2] !=null ? process.argv[2]: "noname"
 	let tiempo = process.argv[3] !=null ? process.argv[3]: "12:00"
-	new ClientController("tcp://localhost", "5555", nombre, tiempo)
+	new NodoController("tcp://localhost", "5555", nombre, tiempo)
 
 	
 }

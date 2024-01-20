@@ -50,3 +50,18 @@ export function actualizarHora(tiempo, min){
   var resultado = horas.toString().padStart(2, '0') + ":" + minutos.toString().padStart(2, '0');
   return resultado
 }
+
+export function eliminarElementoFromArray(arrayDeObjetos,objeto){
+
+// Encontrar el índice del objeto que deseas eliminar (por ejemplo, con el id 2)
+let indiceAEliminar = arrayDeObjetos.findIndex(objeto => objeto.id === objeto.id);
+
+// Verificar si el objeto existe en el array antes de intentar eliminarlo
+if (indiceAEliminar !== -1) {
+  // Utilizar splice para eliminar el objeto en el índice encontrado
+  arrayDeObjetos.splice(indiceAEliminar, 1);
+} else {
+  console.log("El objeto no existe en el array.");
+}
+return arrayDeObjetos
+}

@@ -6,63 +6,62 @@ export default class ClientController {
     
     constructor(url, port, nombre, tiempo) {
         console.log("Connecting to hello world server..."+nombre+" tiempo "+tiempo)
-        this.socketParaPedir = zmq.socket('rep') // Type Request
+        this.socketDealer = zmq.socket('dealer') // Type Request
         this.N=6
         this.cont=0
-        this.tiempo=tiempo
+        this.tiempo=0
         this.nombre=nombre
         this.#connect(url+":"+port)
-        
+        this.enviarRegistro()
         this.#recibirHora()
         this.#checkSalida()
     }
 
     #connect(url){
-        this.socketParaPedir.connect(url)
+        this.socketDealer.connect(url)
     }
 
     #recibirHora(){
-        this.socketParaPedir.on("message", function(respuesta) {
+        this.socketDealer.on("message", function(data) {
+            
+            let message = JSON.parse(data);
+            if(message.message=="dame_diferencia"){
+                this.enviarDiferencia(message)
+                
+                
+            }
+
+            if(message.message=="ajuste"){
+                console.log("ajustar hora " + message.valor)                
+                
+            }
             this.cont++
-            console.log("client " +this.nombre+ " recibo respuesta ", this.cont, ": [", respuesta.toString(), ']')
           
-            this.#actulizarHora(respuesta)
 
             if(this.cont===this.N){
                 console.log("termino")
-                this.socketParaPedir.close()
+                this.socketDealer.close()
                 process.exit(0)
             }
         }.bind(this))
     }
 
-    #actulizarHora(respuesta){
-        let message = JSON.parse(respuesta);
-        message.cont=this.cont
-        message.contenido="dame hora from "+this.nombre
-        if(message.from=="master"){
-            message.diferencia= diferenciaEntreHoras(message.tiempo,this.tiempo)
-            this.tiempo=actualizarHora(this.tiempo,message.diferencia)
-            
-            console.log("enviando petición ", message.cont, '...', "tiempo actual ",this.tiempo)
-        }
-        message.from=this.nombre
-
-        this.horaEs(message)
-
+    enviarRegistro(){
+        console.log("envio registro")
+        let message = {message:"connected"}
+        const messageString = JSON.stringify(message);
+        this.socketDealer.send(messageString)
     }
 
-    async horaEs(message){
-        console.log("Hora envaida: ")
-            if(this.socketParaPedir){
-                message.contenido= " hora from "+this.nombre
-                message.tiempo= this.tiempo
-                message.from=this.nombre
-                const messageString = JSON.stringify(message);
-                this.socketParaPedir.send(messageString)
-            }
-        
+
+    enviarDiferencia(message){
+        console.log("envio de diferencias")
+        let diferencia= Math.abs(new Date() - new Date(message.tiempo));
+        let resp ={message:"diferencia", value:diferencia}
+        const messageString = JSON.stringify(resp);
+        this.socketDealer.send(messageString)
     }
+
     
     
 
@@ -70,7 +69,8 @@ export default class ClientController {
         process.on('SIGINT', function() {
             console.log (" hasta luego "+this.nombre)
             console.log ( " ** SIGINT capturada: cerrando !! ** ")
-            this.socketParaPedir.close()
+            this.socketDealer.close()
+            process.exit(0)
         }.bind(this))
     }
 }

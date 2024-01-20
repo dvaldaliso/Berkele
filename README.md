@@ -6,6 +6,10 @@
 ## https://www.youtube.com/watch?v=z4MQC-4bScE
 
 
-# req repl
-# and
-# routes request
+## https://www.youtube.com/watch?v=z4MQC-4bScE
+# request delay (cliente), router (servidor)
+
+
+# npm install 
+# npm run servidor 
+# npm run cliente nombre

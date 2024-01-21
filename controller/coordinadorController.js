@@ -1,6 +1,11 @@
 import * as zmq from "zeromq"
 import { tiempoPromedio } from "../util/claculo.js";
 import Mensaje from "../model/mensaje.js";
+
+const Estados = {
+    Establecida: 0,
+    Calculando: 1,
+  };
  export default class CoordinadorController{
     /**
      * 
@@ -20,7 +25,6 @@ import Mensaje from "../model/mensaje.js";
         this.vincularSocker(url,port)
         this.recibirMensaje()
         this.checkSalida()
-        this.volverAPedirHoras=false;
     }
    
     vincularSocker(url, port){
@@ -45,13 +49,12 @@ import Mensaje from "../model/mensaje.js";
         //registrarCliente method 
         if( respuesta.message=="connected"){
 		    console.log("connected cliente: "+identity )
-
-            this.client.push({id:identity})
+            this.registrarCliente(identity)
          }
          
          if(respuesta.message=="connected" && 
             this.client.length==this.cantidadNodosPermitidos){
-            this.dameHora()
+            this.actualizarHora()
             this.client=[]
 
          }
@@ -60,16 +63,19 @@ import Mensaje from "../model/mensaje.js";
             console.log("recibe diferencias")
             this.client.push({id:identity,diff:respuesta.value})
             if(this.client.length==this.cantidadNodosPermitidos){
-                this.ajusteHora()
+                this.decidirHora()
             }
          }
       
         }.bind(this))
     }
 
+    registrarCliente(identity) {
+        this.client.push({id:identity})
+    }
 
 
-    ajusteHora(){
+    decidirHora(){
         console.log("ajuste de hora")
         let sumAjust=0
         this.client.forEach(element => {
@@ -87,14 +93,12 @@ import Mensaje from "../model/mensaje.js";
             const messageString = JSON.stringify(messageSend);
             this.socketRouter.send([client.id,messageString])
        });
-       this.volverAPedirHoras=true
 
     }
 
    
 
-    dameHora(){
-        this.volverAPedirHoras=false
+    actualizarHora(){
             if(this.socketRouter){
                 console.log("request for diference")
                 this.tiempo=new Date()

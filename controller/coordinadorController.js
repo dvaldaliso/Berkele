@@ -17,7 +17,6 @@ const Estados = {
         console.log("Connecting to hello world server... master tiempo "+tiempo)
         // creo un socket (de la biblioteca zeromq)
         this.socketRouter = zmq.socket('router') 
-        this.cont=0;
         this.nombre="master"
         this.tiempo=0
         this.client=[]
@@ -43,7 +42,6 @@ const Estados = {
     recibirMensaje(){
 
         this.socketRouter.on('message', function(identity, respuesta) {
-        this.cont++;
         respuesta = JSON.parse(respuesta.toString());
         
         //registrarCliente method 
@@ -93,6 +91,7 @@ const Estados = {
             const messageString = JSON.stringify(messageSend);
             this.socketRouter.send([client.id,messageString])
        });
+       this.salida()
 
     }
 
@@ -115,11 +114,15 @@ const Estados = {
 
     checkSalida(){
         process.on('SIGINT', function() {
-            console.log (" sigint capturada ! ")
-            console.log (" hasta luego "+this.nombre)
-            this.socketRouter.close()
-            process.exit(0)
-            // socketParaPedir = null
+        console.log (" sigint capturada ! ")
+            this.salida()
         }.bind(this))
+    }
+
+    salida(){
+        console.log (" hasta luego "+this.nombre)
+        this.socketRouter.close()
+        process.exit(0)
+        // socketParaPedir = null
     }
  }

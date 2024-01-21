@@ -5,7 +5,7 @@ import { actualizarHora, diferenciaEntreHoras } from "../util/claculo.js";
 export default class NodoController {
     
     constructor(url, port, nombre, tiempo) {
-        console.log("Connecting to hello world server..."+nombre+" tiempo "+tiempo)
+        console.log("Connecting node..."+nombre+" tiempo "+tiempo)
         this.socketDealer = zmq.socket('dealer') // Type Request
         this.N=6
         this.cont=0
@@ -50,8 +50,9 @@ export default class NodoController {
         this.socketDealer.send(messageString)
     }
 
-    nuevaHora(){
-        console.log("actualizar hora")
+    nuevaHora(message){
+        console.log("actualizar hora"+message.valor)
+        this.salida()
     }
 
     diferenciaEs(message){
@@ -67,10 +68,14 @@ export default class NodoController {
 
     #checkSalida(){
         process.on('SIGINT', function() {
-            console.log (" hasta luego "+this.nombre)
             console.log ( " ** SIGINT capturada: cerrando !! ** ")
+            this.salida()
+        }.bind(this))
+    }
+
+    salida(){
+        console.log (" hasta luego "+this.nombre)
             this.socketDealer.close()
             process.exit(0)
-        }.bind(this))
     }
 }

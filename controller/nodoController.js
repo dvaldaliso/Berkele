@@ -26,7 +26,7 @@ export default class NodoController {
             
             let message = JSON.parse(data);
             if(message.message=="dame_diferencia"){
-                this.diferenciaEs(message)
+                this.dimeHora(message)
             }
 
             if(message.message=="ajuste"){
@@ -51,11 +51,11 @@ export default class NodoController {
     }
 
     nuevaHora(message){
-        console.log("actualizar hora"+message.valor)
+        console.log("actualizar hora "+message.valor)
         this.salida()
     }
 
-    diferenciaEs(message){
+    dimeHora(message){
         console.log("envio de diferencias")
         let diferencia= Math.abs(new Date() - new Date(message.tiempo));
         let resp ={message:"diferencia", value:diferencia}
